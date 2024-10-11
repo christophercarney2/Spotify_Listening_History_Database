@@ -1,8 +1,6 @@
 
 # Spotify Listening History Database Creation
 Are you one of those people who get your Spotify Wrapped analysis at the end of every year and think things like "how exactly did they calculate all that?", or "can I drill down any further into this?". This project was designed to do exactly that: construct a functional database of your listening history that lets you answer those questions. Spotify will provide any user with their listening history, but this project will consolidate, clean, expand, and stage that history into a fully explorable dataset. Creating your own version of Wrapped's cleverly shareable screens will then be up to you, but for an example I created a Tableau dashboard that visualizes my own history; judge my questionable taste for yourself here! (**Insert hyperlink Chris!!!**).
-## Table of Contents
-Maybe? I have mixed views on including this, let's see what the rest looks like.
 
 ## Overview
 This project will:
