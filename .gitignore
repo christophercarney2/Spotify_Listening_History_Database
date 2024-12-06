@@ -1,5 +1,9 @@
-.env
-MyData
-client_secret.json
-config.ini
+.ipynb_checkpoints
+Archives
 logs
+MyData
+.cache
+.env
+config.ini
+utils/__pycache__
+utils/.ipynb_checkpoints

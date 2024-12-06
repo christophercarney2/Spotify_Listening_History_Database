@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 """
 Script to set up the database by creating the required tables. Assumes the tables do not already exist.
 
@@ -38,9 +32,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# In[ ]:
-
-
-# In[ ]:

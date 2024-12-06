@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[5]:
-
-
 """
 Script to process and consolidate music listening history data from JSON files provided by Spotify.
 

@@ -1,6 +1,6 @@
 
 # Spotify Listening History Database Creation
-Are you one of those people who get your Spotify Wrapped analysis at the end of every year and think things like "how exactly did they calculate all that?", or "can I drill down any further into this?". This project was designed to do exactly that: construct a functional database of your listening history that lets you answer those questions. Spotify will provide any user with their listening history, but this project will consolidate, clean, expand, and stage that history into a fully explorable dataset. Creating your own version of Wrapped's cleverly shareable screens will then be up to you, but for an example I created a Tableau dashboard that visualizes my own history; judge my questionable taste for yourself here! (**Insert hyperlink Chris!!!**).
+Are you one of those people who get your Spotify Wrapped analysis at the end of every year and think things like "how exactly did they calculate all that?", or "can I drill down any further into this?". This project was designed to do exactly that: construct a functional database of your listening history that lets you answer those questions. Spotify will provide any user with their listening history, but this project will consolidate, clean, expand, and stage that history into a fully explorable dataset. Creating your own version of Wrapped's cleverly shareable screens will then be up to you, but for an example I created a Tableau dashboard that visualizes my own history; judge my questionable taste for yourself [here](https://public.tableau.com/app/profile/chris.carney/viz/MySpotifyHistory10YearsofStreaming/AllStreaming)!
 
 ## Overview
 This project will:
@@ -11,7 +11,7 @@ This project will:
 - Export database tables to csv files for use in future projects/visualizations
 - Download frequently occurring artist and album images for use in future projects/visualizations
 
-See Installation **add hyperlink Chris*** for required setup steps before these tasks, as well as Run the Project **add hyperlink Chris*** for detailed runtime considerations.
+See [Installation](#installation) for required setup steps before these tasks, as well as [Running the Project](#running-the-project) for detailed runtime considerations.
 
 ## Requirements 
 - An active Spotify account (can be free or paid)
@@ -26,7 +26,8 @@ See Installation **add hyperlink Chris*** for required setup steps before these 
 Request your Extended Streaming History from the Account/Privacy page of your Spotify account ([U.S. link](https://www.spotify.com/us/account/privacy/)). This will take up to 30 days to arrive, and you'll unfortunately have to wait for that before you can continue
 
 ### 2. Clone the repository
-```bash git clone https://github.com/yourusername/spotify-data-processor.git cd spotify-data-processor```
+Using git bash...
+```git clone https://github.com/christophercarney2/Spotify_Listening_History_Database```
 
 ### 3. Install the required Python packages
 ```pip install -r requirements.txt```
@@ -64,8 +65,12 @@ album_image_path = **project_root_path**/MyData/album_images/
 Replace the values on the right side of the equals signs, using the value for **project_root_path** again for each of the subsequent paths.
 
 Add this file to .gitignore to keep sensitive information from being posted to github.
+
+### 7. Create logs directory
+Create an empty logs directory in your **project_root_path** to store logs.
+
 ## Running the Project
-This project is broken out into five separate scripts to be run individually by the user. This is because the Spotify Web API's rate limiting is opaque and inconsistent, making a manual restart of certain steps the most feasible solution.
+This project is broken out into five separate scripts to be run individually by the user. This is because the Spotify Web API's rate limiting is opaque and inconsistent, making a manual restart of certain steps the most feasible solution. It also allows the user to ignore the final csv export step if they only plan to work with the data in PostgreSQL.
 
 Before running scripts, ensure that your PostgreSQL server is running. Then make sure the listening history files returned by Spotify are present at your **data_path** (see above config.ini section) and named endsong_#.json, where the # increments by one from 0 for each subsequent file. Spotify has changed the names of these files over the course of development, so this cannot reasonably be automated.
 
@@ -81,5 +86,6 @@ Before running scripts, ensure that your PostgreSQL server is running. Then make
 5. **download_images.py**
 	Retrieves frequently occurring artist and album images from Spotify Web API.
 
-
+6. **export_files_for_tableau.py**
+	Exports the database tables as csvs, which is required if the user plans to use the data with Tableau Public, which does not allow for direct database data connections.
 
