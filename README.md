@@ -62,7 +62,7 @@ data_path = **project_root_path**/MyData
 artist_image_path = **project_root_path**/MyData/artist_images/ 
 album_image_path = **project_root_path**/MyData/album_images/
 
-Replace the values on the right side of the equals signs, using the value for **project_root_path** again for each of the subsequent paths.
+Replace the values on the right side of the equals signs, using the value for **project_root_path** again for each of the subsequent paths. You'll also need to make sure the data, artist image, and album image path folders are created in their proper locations.
 
 Add this file to .gitignore to keep sensitive information from being posted to github.
 
