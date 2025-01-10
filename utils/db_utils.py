@@ -213,7 +213,7 @@ def create_tables(engine, logger):
         Column("spotify_track_id", String(22)),
         Column("spotify_artist_id", String(22)),
         PrimaryKeyConstraint(
-            "spotify_track_id", "spotify_artist_id", name="track_artist_pk"
+            "spotify_track_id", "spotify_artist_id"
         ),
     )
 
@@ -224,48 +224,38 @@ def create_tables(engine, logger):
         Column("new_track_uri", String(36)),
     )
 
-    # Uses the inspector to check existing tables in the database
-    inspector = Inspector.from_engine(engine)
-    existing_tables = set(inspector.get_table_names())
-
-    # Creates the defined tables only if they do not already exist
-    for table_name, table in tables.items():
-        if table_name in existing_tables:
-            logger.info(f"Table '{table_name}' already exists. Skipping creation.")
-        else:
-            table.create(engine)
-            logger.info(f"Table '{table_name}' created in PostgreSQL database")
+    metadata.create_all(engine)
 
     logger.info("Tables created in PostgreSQL database")
 
 
-table_db, table_metadata = initialize_db()
+    table_db, table_metadata = initialize_db()
 
-# List of all table names in the database to ensure they're handled correctly in the script
-# If these table names change, the create_tables function and raw SQL strings in this file will also need to be updated.
-table_names = [
-    "music_listening_history",
-    "tracks",
-    "track_artists",
-    "artists",
-    "artist_genre",
-    "albums",
-    "track_mapping",
-    "tracks_consolidated",
-]
+    # List of all table names in the database to ensure they're handled correctly in the script
+    # If these table names change, the create_tables function and raw SQL strings in this file will also need to be updated.
+    table_names = [
+        "music_listening_history",
+        "tracks",
+        "track_artists",
+        "artists",
+        "artist_genre",
+        "albums",
+        "track_mapping",
+        "tracks_consolidated",
+    ]
 
-# Creates a dictionary to call SQLAlchemy table objects by name.
-tables = {name: table_metadata.tables[name] for name in table_names}
+    # Creates a dictionary to call SQLAlchemy table objects by name.
+    tables = {name: table_metadata.tables[name] for name in table_names}
 
-# Creates individual SQLAlchemy table objects for each table, to be used across scripts for queries and insertions
-music_listening_history_table = tables["music_listening_history"]
-tracks_table = tables["tracks"]
-track_artists_table = tables["track_artists"]
-artists_table = tables["artists"]
-artist_genre_table = tables["artist_genre"]
-albums_table = tables["albums"]
-track_mapping_table = tables["track_mapping"]
-tracks_consolidated_table = tables["tracks_consolidated"]
+    # Creates individual SQLAlchemy table objects for each table, to be used across scripts for queries and insertions
+    music_listening_history_table = tables["music_listening_history"]
+    tracks_table = tables["tracks"]
+    track_artists_table = tables["track_artists"]
+    artists_table = tables["artists"]
+    artist_genre_table = tables["artist_genre"]
+    albums_table = tables["albums"]
+    track_mapping_table = tables["track_mapping"]
+    tracks_consolidated_table = tables["tracks_consolidated"]
 
 
 def load_data_to_db(df, db, table_name, logger):
