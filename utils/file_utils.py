@@ -56,11 +56,9 @@ def clean_dataframe(df):
     """Clean and rename the DataFrame columns for readability, return the updated DataFrame."""
     df = df.drop(
         columns=[
-            "username",
             "platform",
             "conn_country",
-            "ip_addr_decrypted",
-            "user_agent_decrypted",
+            "ip_addr",
             "offline",
             "offline_timestamp",
         ]
