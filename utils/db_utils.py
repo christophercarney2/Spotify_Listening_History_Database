@@ -229,33 +229,33 @@ def create_tables(engine, logger):
     logger.info("Tables created in PostgreSQL database")
 
 
-    table_db, table_metadata = initialize_db()
+table_db, table_metadata = initialize_db()
 
-    # List of all table names in the database to ensure they're handled correctly in the script
-    # If these table names change, the create_tables function and raw SQL strings in this file will also need to be updated.
-    table_names = [
-        "music_listening_history",
-        "tracks",
-        "track_artists",
-        "artists",
-        "artist_genre",
-        "albums",
-        "track_mapping",
-        "tracks_consolidated",
-    ]
+# List of all table names in the database to ensure they're handled correctly in the script
+# If these table names change, the create_tables function and raw SQL strings in this file will also need to be updated.
+table_names = [
+"music_listening_history",
+"tracks",
+"track_artists",
+"artists",
+"artist_genre",
+"albums",
+"track_mapping",
+"tracks_consolidated",
+]
 
-    # Creates a dictionary to call SQLAlchemy table objects by name.
-    tables = {name: table_metadata.tables[name] for name in table_names}
+# Creates a dictionary to call SQLAlchemy table objects by name.
+tables = {name: table_metadata.tables[name] for name in table_names}
 
-    # Creates individual SQLAlchemy table objects for each table, to be used across scripts for queries and insertions
-    music_listening_history_table = tables["music_listening_history"]
-    tracks_table = tables["tracks"]
-    track_artists_table = tables["track_artists"]
-    artists_table = tables["artists"]
-    artist_genre_table = tables["artist_genre"]
-    albums_table = tables["albums"]
-    track_mapping_table = tables["track_mapping"]
-    tracks_consolidated_table = tables["tracks_consolidated"]
+# Creates individual SQLAlchemy table objects for each table, to be used across scripts for queries and insertions
+music_listening_history_table = tables["music_listening_history"]
+tracks_table = tables["tracks"]
+track_artists_table = tables["track_artists"]
+artists_table = tables["artists"]
+artist_genre_table = tables["artist_genre"]
+albums_table = tables["albums"]
+track_mapping_table = tables["track_mapping"]
+tracks_consolidated_table = tables["tracks_consolidated"]
 
 
 def load_data_to_db(df, db, table_name, logger):
