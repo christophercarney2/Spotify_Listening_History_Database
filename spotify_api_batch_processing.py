@@ -1,7 +1,7 @@
 """
 Script to process track data from a CSV file, interact with the Spotify API to fetch detailed information about tracks, albums, and artists, 
 and insert or update this data into a SQL database. 
-
+af
 This script performs the following steps:
 1. Initialize logging and the Spotify API client, connect to the database.
 2. Read and process the master CSV file containing listening history data.
@@ -18,7 +18,7 @@ from utils.spotify_utils import (
     MaxRetriesExceededException,
     get_spotify_client,
     fetch_batch_tracks,
-    fetch_audio_features,
+    #fetch_audio_features, DEPRECATED
     fetch_album,
     fetch_artist,
 )
@@ -29,7 +29,7 @@ from utils.db_utils import (
     insert_new_track,
     insert_album,
     insert_artist,
-    update_audio_features,
+    #update_audio_features, DEPRECATED
     music_listening_history_table,
     tracks_table,
     track_artists_table,
@@ -92,14 +92,14 @@ def process_batch(
             handle_new_track_artists(conn, batch_tracks, track_artists_table, logger)
 
         if batch_has_new_tracks:
-            # Fetches audio features from the Spotify API for new tracks in the batch
-            af_batch_tracks = fetch_audio_features(logger, sp, batch_track_uris)
+            # Fetches audio features from the Spotify API for new tracks in the batch DEPRECATED
+            #af_batch_tracks = fetch_audio_features(logger, sp, batch_track_uris)
             # Inserts new tracks to the database
             handle_new_tracks(
                 sp,
                 conn,
                 batch_tracks,
-                af_batch_tracks,
+                #af_batch_tracks, DEPRECATED
                 tracks_table,
                 albums_table,
                 artists_table,
@@ -151,7 +151,7 @@ def handle_new_tracks(
     sp,
     conn,
     batch_tracks,
-    af_batch_tracks,
+    #af_batch_tracks,
     tracks_table,
     albums_table,
     artists_table,
@@ -165,7 +165,6 @@ def handle_new_tracks(
         sp (spotipy.Spotify): Spotify client instance.
         conn (Connection): SQLAlchemy connection object.
         batch_tracks (dict): Dictionary containing track details from Spotify.
-        af_batch_tracks (list): List of audio features for the tracks.
         tracks_table (Table): SQLAlchemy table object for the 'tracks' table.
         albums_table (Table): SQLAlchemy table object for the 'albums' table.
         artists_table (Table): SQLAlchemy table object for the 'artists' table.
@@ -176,8 +175,13 @@ def handle_new_tracks(
         None
     """
     try:
-        # Loops over each track and its audio features
-        for track, audio_features in zip(batch_tracks["tracks"], af_batch_tracks):
+        # Loops over each track and its audio features DEPRECATED
+        # for track, audio_features in zip(batch_tracks["tracks"], af_batch_tracks):
+        #     if track is None:
+        #         logger.warning("Skipping track due to missing data")
+        #         continue
+
+        for track in batch_tracks["tracks"]:
             if track is None:
                 logger.warning("Skipping track due to missing data")
                 continue
@@ -190,16 +194,16 @@ def handle_new_tracks(
             ).scalar():
                 insert_new_track(conn, tracks_table, track, logger)
 
-            # Logs if audio features are missing, otherwise inserts/updates them
-            if audio_features is None:
-                logger.warning(
-                    f"Skipping audio feature due to missing data for track: {track.get('id')} {track.get('name', 'Unknown')}"
-                )
-            else:
-                update_audio_features(conn, tracks_table, audio_features)
-                logger.info(
-                    f"Updated audio features for {track.get('id')} {track.get('name')}"
-                )
+            # Logs if audio features are missing, otherwise inserts/updates them DEPRECATED
+            # if audio_features is None:
+            #     logger.warning(
+            #         f"Skipping audio feature due to missing data for track: {track.get('id')} {track.get('name', 'Unknown')}"
+            #     )
+            # else:
+            #     update_audio_features(conn, tracks_table, audio_features)
+            #     logger.info(
+            #         f"Updated audio features for {track.get('id')} {track.get('name')}"
+            #     )
 
             # Inserts each new album and artist into the database
             handle_album(sp, conn, track["album"], albums_table, logger)
@@ -209,7 +213,7 @@ def handle_new_tracks(
 
         # Commits the transaction only after all operations are complete
         conn.commit()
-        logger.info("Tracks, albums, artists, and audio features committed")
+        logger.info("Tracks, albums, and artists committed")
 
     except Exception as e:
         logger.error(
