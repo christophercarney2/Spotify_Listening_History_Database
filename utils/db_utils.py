@@ -107,7 +107,7 @@ def create_tables(engine, logger):
 
     # Defines the table schema, only creating if the table doesn't already exist.
     music_listening_history = Table(
-        "music_listening_history",
+        "caitlin_music_listening_history",
         metadata,
         Column("music_stream_id", BigInteger, primary_key=True, autoincrement=True),
         Column("spotify_artist_id", String(22)),
@@ -126,7 +126,7 @@ def create_tables(engine, logger):
     )
 
     artists = Table(
-        "artists",
+        "caitlin_artists",
         metadata,
         Column("spotify_artist_id", String(22), primary_key=True),
         Column("artist_name", Text),
@@ -137,7 +137,7 @@ def create_tables(engine, logger):
     )
 
     albums = Table(
-        "albums",
+        "caitlin_albums",
         metadata,
         Column("spotify_album_id", String(22), primary_key=True),
         Column("spotify_artist_id", String(22)),
@@ -152,14 +152,14 @@ def create_tables(engine, logger):
     )
 
     artist_genres = Table(
-        "artist_genre",
+        "caitlin_artist_genre",
         metadata,
         Column("spotify_artist_id", String(22)),
         Column("genre", Text),
     )
 
     tracks = Table(
-        "tracks",
+        "caitlin_tracks",
         metadata,
         Column("spotify_track_uri", String(36)),
         Column("spotify_track_id", String(22), primary_key=True),
@@ -183,7 +183,7 @@ def create_tables(engine, logger):
     )
 
     tracks_consolidated = Table(
-        "tracks_consolidated",
+        "caitlin_tracks_consolidated",
         metadata,
         Column("spotify_track_uri", String(36)),
         Column("spotify_track_id", String(22), primary_key=True),
@@ -207,7 +207,7 @@ def create_tables(engine, logger):
     )
 
     track_artists = Table(
-        "track_artists",
+        "caitlin_track_artists",
         metadata,
         Column("spotify_track_uri", String(36)),
         Column("spotify_track_id", String(22)),
@@ -218,7 +218,7 @@ def create_tables(engine, logger):
     )
 
     track_mapping = Table(
-        "track_mapping",
+        "caitlin_track_mapping",
         metadata,
         Column("old_track_uri", String(36), primary_key=True),
         Column("new_track_uri", String(36)),
@@ -234,28 +234,28 @@ table_db, table_metadata = initialize_db()
 # List of all table names in the database to ensure they're handled correctly in the script
 # If these table names change, the create_tables function and raw SQL strings in this file will also need to be updated.
 table_names = [
-"music_listening_history",
-"tracks",
-"track_artists",
-"artists",
-"artist_genre",
-"albums",
-"track_mapping",
-"tracks_consolidated",
+    "caitlin_music_listening_history",
+    "caitlin_tracks",
+    "caitlin_track_artists",
+    "caitlin_artists",
+    "caitlin_artist_genre",
+    "caitlin_albums",
+    "caitlin_track_mapping",
+    "caitlin_tracks_consolidated",
 ]
 
 # Creates a dictionary to call SQLAlchemy table objects by name.
 tables = {name: table_metadata.tables[name] for name in table_names}
 
 # Creates individual SQLAlchemy table objects for each table, to be used across scripts for queries and insertions
-music_listening_history_table = tables["music_listening_history"]
-tracks_table = tables["tracks"]
-track_artists_table = tables["track_artists"]
-artists_table = tables["artists"]
-artist_genre_table = tables["artist_genre"]
-albums_table = tables["albums"]
-track_mapping_table = tables["track_mapping"]
-tracks_consolidated_table = tables["tracks_consolidated"]
+music_listening_history_table = tables["caitlin_music_listening_history"]
+tracks_table = tables["caitlin_tracks"]
+track_artists_table = tables["caitlin_track_artists"]
+artists_table = tables["caitlin_artists"]
+artist_genre_table = tables["caitlin_artist_genre"]
+albums_table = tables["caitlin_albums"]
+track_mapping_table = tables["caitlin_track_mapping"]
+tracks_consolidated_table = tables["caitlin_tracks_consolidated"]
 
 
 def load_data_to_db(df, db, table_name, logger):
@@ -324,30 +324,30 @@ def check_new_tracks_and_artists(
             select(tracks_table).where(tracks_table.c.spotify_track_uri == track_uri)
         ).scalar()
 
-        # Checks if the track exists but its audio features are not populated
-        af_not_populated = conn.execute(
-            select(tracks_table).where(
-                and_(
-                    tracks_table.c.spotify_track_uri == track_uri,
-                    or_(
-                        tracks_table.c.acousticness.is_(None),
-                        tracks_table.c.danceability.is_(None),
-                        tracks_table.c.energy.is_(None),
-                        tracks_table.c.instrumentalness.is_(None),
-                        tracks_table.c.liveness.is_(None),
-                        tracks_table.c.loudness.is_(None),
-                        tracks_table.c.speechiness.is_(None),
-                        tracks_table.c.valence.is_(None),
-                        tracks_table.c.tempo.is_(None),
-                        tracks_table.c.key.is_(None),
-                        tracks_table.c.time_signature.is_(None),
-                    ),
-                )
-            )
-        ).scalar()
+        # Checks if the track exists but its audio features are not populated DEPRECATED
+        # af_not_populated = conn.execute(
+            # select(tracks_table).where(
+                # and_(
+                    # tracks_table.c.spotify_track_uri == track_uri,
+                    # or_(
+                        # tracks_table.c.acousticness.is_(None),
+                        # tracks_table.c.danceability.is_(None),
+                        # tracks_table.c.energy.is_(None),
+                        # tracks_table.c.instrumentalness.is_(None),
+                        # tracks_table.c.liveness.is_(None),
+                        # tracks_table.c.loudness.is_(None),
+                        # tracks_table.c.speechiness.is_(None),
+                        # tracks_table.c.valence.is_(None),
+                        # tracks_table.c.tempo.is_(None),
+                        # tracks_table.c.key.is_(None),
+                        # tracks_table.c.time_signature.is_(None),
+                    # ),
+                # )
+            # )
+        # ).scalar()
 
-        # Marks batch_has_new_tracks if track is new or audio features are missing
-        if not track_exists or af_not_populated:
+        # Marks batch_has_new_tracks if track is new (or audio features are missing DEPRECATED)
+        if not track_exists:
             batch_has_new_tracks = True
 
         # Checks if the track artist exists in the database
@@ -499,53 +499,53 @@ def insert_artist(conn, artists_table, artist_genre_table, artist, logger):
     except Exception as e:
         logger.warning(f"Skipping artist {artist['name']} due to an error: {e}")
 
+# DEPRECATED
+# def update_audio_features(conn, tracks_table, audio_features):
+    # """
+    # Update audio features for a specific track in the tracks table.
 
-def update_audio_features(conn, tracks_table, audio_features):
-    """
-    Update audio features for a specific track in the tracks table.
+    # Args:
+        # conn: The database connection object.
+        # audio_features (dict): Dictionary containing audio feature details.
+        # tracks_table: SQLAlchemy Table object representing the tracks table.
 
-    Args:
-        conn: The database connection object.
-        audio_features (dict): Dictionary containing audio feature details.
-        tracks_table: SQLAlchemy Table object representing the tracks table.
+    # Returns:
+        # None
+    # """
+    #Extracts audio feature values from the input dictionary
+    # uri = audio_features.get("uri")
+    # acousticness = audio_features.get("acousticness")
+    # danceability = audio_features.get("danceability")
+    # energy = audio_features.get("energy")
+    # instrumentalness = audio_features.get("instrumentalness")
+    # liveness = audio_features.get("liveness")
+    # loudness = audio_features.get("loudness")
+    # speechiness = audio_features.get("speechiness")
+    # valence = audio_features.get("valence")
+    # tempo = audio_features.get("tempo")
+    # key = audio_features.get("key")
+    # time_signature = audio_features.get("time_signature")
 
-    Returns:
-        None
-    """
-    # Extracts audio feature values from the input dictionary
-    uri = audio_features.get("uri")
-    acousticness = audio_features.get("acousticness")
-    danceability = audio_features.get("danceability")
-    energy = audio_features.get("energy")
-    instrumentalness = audio_features.get("instrumentalness")
-    liveness = audio_features.get("liveness")
-    loudness = audio_features.get("loudness")
-    speechiness = audio_features.get("speechiness")
-    valence = audio_features.get("valence")
-    tempo = audio_features.get("tempo")
-    key = audio_features.get("key")
-    time_signature = audio_features.get("time_signature")
+    #Prepares the update statement SQL for audio features
+    # audio_features_updt_stmt = (
+        # update(tracks_table)
+        # .where(tracks_table.c.spotify_track_uri == uri)
+        # .values(
+            # acousticness=acousticness,
+            # danceability=danceability,
+            # energy=energy,
+            # instrumentalness=instrumentalness,
+            # liveness=liveness,
+            # loudness=loudness,
+            # speechiness=speechiness,
+            # valence=valence,
+            # tempo=tempo,
+            # key=key,
+            # time_signature=time_signature,
+        # )
+    # )
 
-    # Prepares the update statement SQL for audio features
-    audio_features_updt_stmt = (
-        update(tracks_table)
-        .where(tracks_table.c.spotify_track_uri == uri)
-        .values(
-            acousticness=acousticness,
-            danceability=danceability,
-            energy=energy,
-            instrumentalness=instrumentalness,
-            liveness=liveness,
-            loudness=loudness,
-            speechiness=speechiness,
-            valence=valence,
-            tempo=tempo,
-            key=key,
-            time_signature=time_signature,
-        )
-    )
-
-    conn.execute(audio_features_updt_stmt)
+    # conn.execute(audio_features_updt_stmt)
 
 
 def update_music_listening_history(
@@ -728,9 +728,9 @@ def get_artists_and_albums_for_img(db, table):
 
 # If these table names are changed, the create_tables function and table_names list should be updated.
 TRACK_MAPPING_QUERY = """
-TRUNCATE TABLE track_mapping;
+TRUNCATE TABLE caitlin_track_mapping;
 
-INSERT INTO track_mapping
+INSERT INTO caitlin_track_mapping
 SELECT COALESCE(y.spotify_track_uri,x.spotify_track_uri) old_track_uri,
 	   x.spotify_track_uri AS new_track_uri FROM
    ( SELECT 
@@ -772,8 +772,8 @@ SELECT COALESCE(y.spotify_track_uri,x.spotify_track_uri) old_track_uri,
             MIN(t2.duration_ms) AS min_duration_ms,
             -- Create a group by minimum duration to ensure tracks within 3000ms are grouped together
             t1.duration_ms - t1.duration_ms % 3000 AS duration_ms_group
-        FROM tracks t1
-        JOIN tracks t2 
+        FROM caitlin_tracks t1
+        JOIN caitlin_tracks t2 
             ON t1.track_name = t2.track_name 
             AND t1.spotify_artist_id = t2.spotify_artist_id
             AND ABS(t1.duration_ms - t2.duration_ms) <= 3000
@@ -797,10 +797,10 @@ SELECT COALESCE(y.spotify_track_uri,x.spotify_track_uri) old_track_uri,
 	        t1.key,
 	        t1.time_signature
     ) t
-    JOIN albums a ON t.spotify_album_id = a.spotify_album_id
+    JOIN caitlin_albums a ON t.spotify_album_id = a.spotify_album_id
 	) x
 LEFT OUTER JOIN
-tracks y
+caitlin_tracks y
 ON x.spotify_artist_id = y.spotify_artist_id
 AND x.track_name = y.track_name
 AND x.duration_ms_group = y.duration_ms - y.duration_ms % 3000
@@ -808,9 +808,9 @@ WHERE RNK = 1;
 """
 
 TRACKS_CONSOLIDATED_QUERY = """
-TRUNCATE TABLE tracks_consolidated;
+TRUNCATE TABLE caitlin_tracks_consolidated;
 
-INSERT INTO tracks_consolidated
+INSERT INTO caitlin_tracks_consolidated
 SELECT DISTINCT
 		t.spotify_track_uri,
 		t.spotify_track_id,
@@ -831,26 +831,26 @@ SELECT DISTINCT
         t.tempo,
         t.key,
         t.time_signature
-FROM tracks t
-JOIN track_mapping tm
+FROM caitlin_tracks t
+JOIN caitlin_track_mapping tm
 	ON t.spotify_track_uri = tm.new_track_uri
 JOIN 
 	(SELECT ta.spotify_track_id, STRING_AGG(a.artist_name,', ' ORDER BY CASE WHEN ta.spotify_artist_id = t.spotify_artist_id THEN 1 ELSE 2 END) artist_names 
-	FROM track_artists ta
-	JOIN artists a
+	FROM caitlin_track_artists ta
+	JOIN caitlin_artists a
 		ON ta.spotify_artist_id = a.spotify_artist_id
-	JOIN tracks t
+	JOIN caitlin_tracks t
 		ON ta.spotify_track_id = t.spotify_track_id
 	GROUP BY ta.spotify_track_id) an
 ON t.spotify_track_id = an.spotify_track_id;
 """
 
 GENRES_UPDATE_QUERY = """
-UPDATE artists AS a
+UPDATE caitlin_artists AS a
 SET genres = ag.genres
 FROM (
     SELECT spotify_artist_id, string_agg(genre, ', ') AS genres
-    FROM artist_genre
+    FROM caitlin_artist_genre
     GROUP BY spotify_artist_id
 ) AS ag
 WHERE a.spotify_artist_id = ag.spotify_artist_id
