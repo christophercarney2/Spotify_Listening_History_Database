@@ -107,7 +107,7 @@ def create_tables(engine, logger):
 
     # Defines the table schema, only creating if the table doesn't already exist.
     music_listening_history = Table(
-        "caitlin_music_listening_history",
+        "music_listening_history",
         metadata,
         Column("music_stream_id", BigInteger, primary_key=True, autoincrement=True),
         Column("spotify_artist_id", String(22)),
@@ -126,7 +126,7 @@ def create_tables(engine, logger):
     )
 
     artists = Table(
-        "caitlin_artists",
+        "artists",
         metadata,
         Column("spotify_artist_id", String(22), primary_key=True),
         Column("artist_name", Text),
@@ -137,7 +137,7 @@ def create_tables(engine, logger):
     )
 
     albums = Table(
-        "caitlin_albums",
+        "albums",
         metadata,
         Column("spotify_album_id", String(22), primary_key=True),
         Column("spotify_artist_id", String(22)),
@@ -152,14 +152,14 @@ def create_tables(engine, logger):
     )
 
     artist_genres = Table(
-        "caitlin_artist_genre",
+        "artist_genre",
         metadata,
         Column("spotify_artist_id", String(22)),
         Column("genre", Text),
     )
 
     tracks = Table(
-        "caitlin_tracks",
+        "tracks",
         metadata,
         Column("spotify_track_uri", String(36)),
         Column("spotify_track_id", String(22), primary_key=True),
@@ -183,7 +183,7 @@ def create_tables(engine, logger):
     )
 
     tracks_consolidated = Table(
-        "caitlin_tracks_consolidated",
+        "tracks_consolidated",
         metadata,
         Column("spotify_track_uri", String(36)),
         Column("spotify_track_id", String(22), primary_key=True),
@@ -207,7 +207,7 @@ def create_tables(engine, logger):
     )
 
     track_artists = Table(
-        "caitlin_track_artists",
+        "track_artists",
         metadata,
         Column("spotify_track_uri", String(36)),
         Column("spotify_track_id", String(22)),
@@ -218,7 +218,7 @@ def create_tables(engine, logger):
     )
 
     track_mapping = Table(
-        "caitlin_track_mapping",
+        "track_mapping",
         metadata,
         Column("old_track_uri", String(36), primary_key=True),
         Column("new_track_uri", String(36)),
@@ -234,28 +234,28 @@ table_db, table_metadata = initialize_db()
 # List of all table names in the database to ensure they're handled correctly in the script
 # If these table names change, the create_tables function and raw SQL strings in this file will also need to be updated.
 table_names = [
-    "caitlin_music_listening_history",
-    "caitlin_tracks",
-    "caitlin_track_artists",
-    "caitlin_artists",
-    "caitlin_artist_genre",
-    "caitlin_albums",
-    "caitlin_track_mapping",
-    "caitlin_tracks_consolidated",
+    "music_listening_history",
+    "tracks",
+    "track_artists",
+    "artists",
+    "artist_genre",
+    "albums",
+    "track_mapping",
+    "tracks_consolidated",
 ]
 
 # Creates a dictionary to call SQLAlchemy table objects by name.
 tables = {name: table_metadata.tables[name] for name in table_names}
 
 # Creates individual SQLAlchemy table objects for each table, to be used across scripts for queries and insertions
-music_listening_history_table = tables["caitlin_music_listening_history"]
-tracks_table = tables["caitlin_tracks"]
-track_artists_table = tables["caitlin_track_artists"]
-artists_table = tables["caitlin_artists"]
-artist_genre_table = tables["caitlin_artist_genre"]
-albums_table = tables["caitlin_albums"]
-track_mapping_table = tables["caitlin_track_mapping"]
-tracks_consolidated_table = tables["caitlin_tracks_consolidated"]
+music_listening_history_table = tables["music_listening_history"]
+tracks_table = tables["tracks"]
+track_artists_table = tables["track_artists"]
+artists_table = tables["artists"]
+artist_genre_table = tables["artist_genre"]
+albums_table = tables["albums"]
+track_mapping_table = tables["track_mapping"]
+tracks_consolidated_table = tables["tracks_consolidated"]
 
 
 def load_data_to_db(df, db, table_name, logger):
@@ -728,9 +728,9 @@ def get_artists_and_albums_for_img(db, table):
 
 # If these table names are changed, the create_tables function and table_names list should be updated.
 TRACK_MAPPING_QUERY = """
-TRUNCATE TABLE caitlin_track_mapping;
+TRUNCATE TABLE track_mapping;
 
-INSERT INTO caitlin_track_mapping
+INSERT INTO track_mapping
 SELECT COALESCE(y.spotify_track_uri,x.spotify_track_uri) old_track_uri,
 	   x.spotify_track_uri AS new_track_uri FROM
    ( SELECT 
@@ -772,8 +772,8 @@ SELECT COALESCE(y.spotify_track_uri,x.spotify_track_uri) old_track_uri,
             MIN(t2.duration_ms) AS min_duration_ms,
             -- Create a group by minimum duration to ensure tracks within 3000ms are grouped together
             t1.duration_ms - t1.duration_ms % 3000 AS duration_ms_group
-        FROM caitlin_tracks t1
-        JOIN caitlin_tracks t2 
+        FROM tracks t1
+        JOIN tracks t2 
             ON t1.track_name = t2.track_name 
             AND t1.spotify_artist_id = t2.spotify_artist_id
             AND ABS(t1.duration_ms - t2.duration_ms) <= 3000
@@ -797,10 +797,10 @@ SELECT COALESCE(y.spotify_track_uri,x.spotify_track_uri) old_track_uri,
 	        t1.key,
 	        t1.time_signature
     ) t
-    JOIN caitlin_albums a ON t.spotify_album_id = a.spotify_album_id
+    JOIN albums a ON t.spotify_album_id = a.spotify_album_id
 	) x
 LEFT OUTER JOIN
-caitlin_tracks y
+tracks y
 ON x.spotify_artist_id = y.spotify_artist_id
 AND x.track_name = y.track_name
 AND x.duration_ms_group = y.duration_ms - y.duration_ms % 3000
@@ -808,9 +808,9 @@ WHERE RNK = 1;
 """
 
 TRACKS_CONSOLIDATED_QUERY = """
-TRUNCATE TABLE caitlin_tracks_consolidated;
+TRUNCATE TABLE tracks_consolidated;
 
-INSERT INTO caitlin_tracks_consolidated
+INSERT INTO tracks_consolidated
 SELECT DISTINCT
 		t.spotify_track_uri,
 		t.spotify_track_id,
@@ -831,26 +831,26 @@ SELECT DISTINCT
         t.tempo,
         t.key,
         t.time_signature
-FROM caitlin_tracks t
-JOIN caitlin_track_mapping tm
+FROM tracks t
+JOIN track_mapping tm
 	ON t.spotify_track_uri = tm.new_track_uri
 JOIN 
 	(SELECT ta.spotify_track_id, STRING_AGG(a.artist_name,', ' ORDER BY CASE WHEN ta.spotify_artist_id = t.spotify_artist_id THEN 1 ELSE 2 END) artist_names 
-	FROM caitlin_track_artists ta
-	JOIN caitlin_artists a
+	FROM track_artists ta
+	JOIN artists a
 		ON ta.spotify_artist_id = a.spotify_artist_id
-	JOIN caitlin_tracks t
+	JOIN tracks t
 		ON ta.spotify_track_id = t.spotify_track_id
 	GROUP BY ta.spotify_track_id) an
 ON t.spotify_track_id = an.spotify_track_id;
 """
 
 GENRES_UPDATE_QUERY = """
-UPDATE caitlin_artists AS a
+UPDATE artists AS a
 SET genres = ag.genres
 FROM (
     SELECT spotify_artist_id, string_agg(genre, ', ') AS genres
-    FROM caitlin_artist_genre
+    FROM artist_genre
     GROUP BY spotify_artist_id
 ) AS ag
 WHERE a.spotify_artist_id = ag.spotify_artist_id
