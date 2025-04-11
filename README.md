@@ -15,9 +15,10 @@ See [Installation](#installation) for required setup steps before these tasks, a
 
 ## Requirements 
 - An active Spotify account (can be free or paid)
-- Python 3.9 or higher
-- PostgreSQL 16 or higher
+- Python 3.9
+- PostgreSQL 16 (newer versions may work, but compatibility not guaranteed)
 - Spotify Web API key
+- See requirements.txt for dependencies
 - **Primary Libraries Used:** Spotipy, SQLAlchemy, psycopg2, pandas
 
 ## Installation
